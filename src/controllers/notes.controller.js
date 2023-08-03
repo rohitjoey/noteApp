@@ -1,19 +1,46 @@
 const db = require("../config/database");
 
+
+/**
+ * @swagger
+ * tags:
+ *   name: Items
+ *   description: API for managing items
+ */
+
+/**
+ * @swagger
+ * /items:
+ *   post:
+ *     summary: Create a new item
+ *     tags: [Items]
+ *     parameters:
+ *       - in: body
+ *         name: item
+ *         description: The item to create
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *             description:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: The created item
+ *       500:
+ *         description: Internal Server Error
+ */
 const createNote = async (req, res) => {
   const { title, description, userId } = req.body;
   try {
     const { rows } = await db.query(
-      "INSERT INTO notes (title, description, user_id) VALUES ($1, $2, $3)",
+      "INSERT INTO notes (title, description, user_id) VALUES ($1, $2, $3) RETURNING *",
       [title, description, userId]
     );
 
-    res.status(201).send({
-      message: "Note added successfully!",
-      body: {
-        note: { title, description },
-      },
-    });
+    res.status(201).send(rows[0]);
   } catch (err) {
     console.error("Error creating note", err);
     res.status(500).json({ error: "Internal Server Error" });
